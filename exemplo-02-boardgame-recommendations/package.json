@@ -1,0 +1,21 @@
+{
+    "name": "boardgame-recommendations",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "setup-data": "npx tsx scripts/setup-data.ts",
+        "fetch-bgg": "npx tsx scripts/fetch-bgg-data.ts"
+    },
+    "dependencies": {
+        "@tensorflow/tfjs": "^4.22.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.7.0",
+        "vite": "^6.0.0",
+        "tsx": "^4.19.0",
+        "@xmldom/xmldom": "^0.9.0"
+    }
+}
