@@ -26,15 +26,21 @@ export function makeContext(products: Game[], users: User[]): Context {
     const maxPrice = Math.max(...basePrices);
 
     const allMechanics = [...new Set(products.flatMap(p => p.mechanics))];
+    const allCategories = [...new Set(products.flatMap(p => p.categories))];
     const allThemes = [...new Set(products.map(p => p.theme))];
 
     if (allMechanics.length === 0) allMechanics.push('(none)');
+    if (allCategories.length === 0) allCategories.push('(none)');
     if (allThemes.length < 2) {
         if (!allThemes.includes('(none)')) allThemes.push('(none)');
     }
 
     const mechanicsIndex: Record<string, number> = Object.fromEntries(
         allMechanics.map((m, i) => [m, i])
+    );
+
+    const categoriesIndex: Record<string, number> = Object.fromEntries(
+        allCategories.map((c, i) => [c, i])
     );
 
     const themesIndex: Record<string, number> = Object.fromEntries(
@@ -71,25 +77,24 @@ export function makeContext(products: Game[], users: User[]): Context {
     });
 
     const numMechanics = allMechanics.length;
+    const numCategories = allCategories.length;
     const numThemes = allThemes.length;
-    const dimensions = 4 + numMechanics + numThemes;
+    const dimensions = 3 + numMechanics + numCategories + numThemes;
 
     return {
         products,
         users,
-        colorsIndex: undefined as never,
-        categoriesIndex: {},
         minAge,
         maxAge,
         minPrice,
         maxPrice,
-        numCategories: 0,
-        numColors: 0,
         dimensions,
         productAvgAgeNorm,
         mechanicsIndex,
+        categoriesIndex,
         themesIndex,
         numMechanics,
+        numCategories,
         numThemes,
         minPlaytime,
         maxPlaytime,
@@ -103,10 +108,6 @@ export function encodeProduct(product: Game, context: Context): tf.Tensor1D {
 
     const price = tf.tensor1d([
         normalize(basePrice, context.minPrice, context.maxPrice) * WEIGHTS.price_category
-    ]);
-
-    const complexity = tf.tensor1d([
-        normalize(product.complexity, 1, 5) * WEIGHTS.complexity
     ]);
 
     const playtime = tf.tensor1d([
@@ -126,6 +127,11 @@ export function encodeProduct(product: Game, context: Context): tf.Tensor1D {
         .filter(i => i !== undefined);
     const mechanics = multiHotWeighted(mechanicIndices, context.numMechanics, WEIGHTS.mechanics);
 
+    const categoryIndices = product.categories
+        .map(c => context.categoriesIndex[c])
+        .filter(i => i !== undefined);
+    const categories = multiHotWeighted(categoryIndices, context.numCategories, WEIGHTS.categories);
+
     let theme: tf.Tensor1D;
     if (context.numThemes < 2) {
         theme = tf.tensor1d([1 * WEIGHTS.theme]);
@@ -134,21 +140,23 @@ export function encodeProduct(product: Game, context: Context): tf.Tensor1D {
         theme = oneHotWeighted(themeIndex, context.numThemes, WEIGHTS.theme);
     }
 
-    return tf.concat1d([price, complexity, playtime, players, mechanics, theme]);
+    return tf.concat1d([price, playtime, players, mechanics, categories, theme]);
 }
 
 export function encodeUser(user: User, context: Context): tf.Tensor1D {
+    const ageFeature = tf.tensor1d([
+        normalize(user.age, context.minAge, context.maxAge) * WEIGHTS.age
+    ]);
+
     if (user.rentals.length) {
         const encodedGames = user.rentals.map(rental => {
             const game = context.products.find(g => g.id === rental.game_id);
             if (!game) throw new Error(`Game not found for rental: ${rental.name}`);
             return encodeProduct(game, context);
         });
-        return tf.stack(encodedGames).mean(0) as tf.Tensor1D;
+        const preference = tf.stack(encodedGames).mean(0) as tf.Tensor1D;
+        return tf.concat1d([ageFeature, preference]);
     }
 
-    return tf.concat1d([
-        tf.tensor1d([normalize(user.age, context.minAge, context.maxAge) * 0.05]),
-        tf.zeros([context.dimensions - 1]),
-    ]);
+    return tf.concat1d([ageFeature, tf.zeros([context.dimensions])]);
 }

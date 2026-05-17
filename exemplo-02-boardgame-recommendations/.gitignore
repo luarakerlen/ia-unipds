@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .superpowers/
-
+data/games_base.json
+data/users_base.json
 *.log
 .env

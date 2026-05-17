@@ -25,7 +25,7 @@ export function createTrainingData(context: Context) {
     return {
         xs: tf.tensor2d(inputs),
         ys: tf.tensor2d(labels, [labels.length, 1]),
-        inputDimensions: context.dimensions * 2,
+        inputDimensions: context.dimensions * 2 + 1,
     };
 }
 

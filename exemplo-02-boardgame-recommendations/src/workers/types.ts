@@ -5,6 +5,7 @@ export interface Game {
     price_category: string;
     price_base: number;
     mechanics: string[];
+    categories: string[];
     min_players: number;
     max_players: number;
     playtime: number;
@@ -32,20 +33,18 @@ export interface User {
 export interface Context {
     products: Game[];
     users: User[];
-    colorsIndex: never;
-    categoriesIndex: Record<string, number>;
     minAge: number;
     maxAge: number;
     minPrice: number;
     maxPrice: number;
-    numCategories: number;
-    numColors: number;
     dimensions: number;
     productAvgAgeNorm: Record<string, number>;
     mechanicsIndex: Record<string, number>;
+    categoriesIndex: Record<string, number>;
     themesIndex: Record<string, number>;
     productVectors?: { name: string; meta: Game; vector: Float32Array }[];
     numMechanics: number;
+    numCategories: number;
     numThemes: number;
     minPlaytime: number;
     maxPlaytime: number;
@@ -54,12 +53,13 @@ export interface Context {
 }
 
 export const WEIGHTS = {
-    mechanics: 0.35,
-    complexity: 0.25,
+    age: 0.10,
+    mechanics: 0.15,
+    categories: 0.20,
     price_category: 0.10,
-    playtime: 0.10,
+    playtime: 0.15,
     players_avg: 0.10,
-    theme: 0.10,
+    theme: 0.20,
 };
 
 export const PRICE_MAP: Record<string, number> = {
