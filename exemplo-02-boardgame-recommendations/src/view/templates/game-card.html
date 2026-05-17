@@ -2,10 +2,11 @@
     <div class="card game-card">
         <div class="card-body">
             <h5 class="card-title">{{name}}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">{{mechanics}}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">{{categories}}</h6>
             <p class="card-text">
                 <strong>Price:</strong> R${{price_base}} ({{price_category}})<br>
                 <strong>Players:</strong> {{min_players}}-{{max_players}}<br>
+                <strong>Minimum Age:</strong> {{min_age}}<br>
                 <strong>Duration:</strong> {{playtime}}min<br>
             </p>
             <button class="btn btn-primary rent-now-btn" data-game='{{game}}'>Rent Now</button>
