@@ -4,9 +4,41 @@
 
 <script>
 	const output = document.getElementById('output');
-  ;(async () => {
-    const params = await LanguageModel.params();
-    console.log(params);
-    console.log({params});
-  })();
+	(async () => {
+		const temperature = 1;
+		const topK = 3;
+
+		const initialPrompts = [
+			{
+				role: 'system',
+				content:
+					'Você é um assistente de IA que responde de forma clara e objetiva.',
+			},
+		];
+
+		const question = 'quem inventou o relógio de pulso?';
+    output.innerHTML = "Gerando resposta...";
+
+		const session = await LanguageModel.create({
+			expectedInputLanguages: ['pt'],
+			expectedOutputLanguages: ['pt'],
+			temperature,
+			topK,
+			initialPrompts,
+		});
+
+		const responseStream = await session.promptStreaming([
+			{
+				role: 'user',
+				content: question,
+			},
+		]);
+
+    let fullResponse = '';
+		for await (const token of responseStream) {
+			console.log(token);
+      fullResponse += token;
+      output.innerHTML = markdown.toHTML(fullResponse);
+		}
+	})();
 </script>
