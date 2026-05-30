@@ -280,7 +280,8 @@ After starting the infrastructure with `pnpm alumnus:infra:up`, you can integrat
     "grafana": {
 			"type": "sse",
 			"url": "http://localhost:8000/mcp"
-		}
+	}
+  }
 }
 ```
 
