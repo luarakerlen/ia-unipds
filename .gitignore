@@ -12,6 +12,9 @@
 */.terraform
 */*.js.map
 
+*/neo4j
+*/import
+
 # Logs
 */logs
 */*.log
